@@ -17,4 +17,4 @@ def memory_strided_im2col(arr: np.ndarray, kernel: np.ndarray) -> np.ndarray:
 def convolute(arr: np.ndarray, kernel: np.ndarray) -> np.ndarray:
     """ Returns 1D array; reshape outside of function """
     mem_strided_arr = memory_strided_im2col(arr, kernel)
-    return np.dot(kernel.flatten(), mem_strided_arr)
+    return np.dot(mem_strided_arr, kernel.flatten())
