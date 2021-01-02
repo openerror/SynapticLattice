@@ -86,15 +86,29 @@ def test_update_site_p():
     true_p[1, 1] = syp.lambda_off * (1. - 2/8)
     true_p[2, 1] = syp.lambda_off * (1. - 2/8)
     true_p[3, 0] = syp.alpha + syp.lambda_on * 3/8
-
     assert np.allclose(true_p, syp.p)
+
+
+def test_update_all_p():
+    """ Compare vectorized computation to for loop + update_site_p() """
+    pool = MoleculePool(delta=1., gamma=2., max_n=1000, init_n=100)
+    syp = Synapse(side_length=3, alpha=0.05, beta=0.05, lambda_on=1., lambda_off=0.8, pool_instance=pool)
+
+    # Initialize synaptic occupancies and propensities
+    # SynapseInitializer uses for loop + update_site_p()
+    SynapseInitializer().random_init(syp, fill_frac=1.)
+    for_loop_p = syp.p.copy()
+
+    # Perturb, update_all_p(), and compare
+    syp.p = np.random.random(size=syp.p.shape)
+    syp.update_all_p()
+    assert np.allclose(for_loop_p, syp.p)
 
 
 def test_trigger():
     """
     Check if changes are correctly propagated in synapse AND pool
     """
-
     pool = MoleculePool(delta=1., gamma=2., max_n=1000, init_n=100)
     syp = Synapse(side_length=3, alpha=0.05, beta=1, lambda_on=1., lambda_off=0.8, pool_instance=pool)
 

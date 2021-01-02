@@ -2,6 +2,7 @@ from typing import *
 from itertools import product
 import warnings
 import numpy as np
+from src.im2col import convolute
 from src.locate_first_geq import locate_first_geq
 
 
@@ -12,6 +13,7 @@ class Synapse:
                  random_state=None):
         self.s = np.zeros(shape=(side_length, side_length), dtype=np.int8)
         self.ss = np.zeros(shape=(side_length + 2, side_length + 2), dtype=np.int8)
+        self.neighbor_mask = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=self.ss.dtype)
         self.p = np.zeros(shape=(side_length * side_length, 2), dtype=np.float64)
         self.total_p: float = 0.
         self.alpha, self.lambda_on, self.lambda_off = alpha, lambda_on, lambda_off
@@ -99,9 +101,19 @@ class Synapse:
         self.total_p = self.p.sum()
 
     def update_all_p(self):
-        for site_index in range(self.s.size):
-            self.update_site_p(site_index)
+        v = convolute(self.ss, self.neighbor_mask).reshape(*self.s.shape)
+        v = v / self.neighbor_mask.sum()  # normalize to fraction [0...1]
+        on_mask, off_mask = (self.s == 1).flatten(), (self.s == 0).flatten()
+
+        self.p[:, 1] = np.where(on_mask, self.lambda_off * (1. - v.flatten()), 0.)
+        self.p[:, 0] = np.where(off_mask, self.alpha + self.lambda_on * v.flatten(), 0.)
+        if self.pool_instance:
+            self.p[on_mask, 1] *= (self.pool_instance.max_n - self.pool_instance.n)
+            self.p[off_mask, 0] *= self.pool_instance.n
         self.update_total_p()
+        # for site_index in range(self.s.size):
+        #     self.update_site_p(site_index)
+        # self.update_total_p()
 
     def _scalar_index_to_xy(self, index: int) -> Tuple[int, int]:
         # origin on top left corner, index first increases to the right across the row
