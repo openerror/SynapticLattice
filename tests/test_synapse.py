@@ -2,11 +2,13 @@ from itertools import product
 import numpy as np
 import pytest
 from src.MoleculePool import MoleculePool
+from src.Simulation import Simulation
 from src.Synapse import Synapse
+from src.SypInit import SynapseInitializer
 
 
 def test_scalar_index_to_xy():
-    la = Synapse(side_length=(L := 3), alpha=1., lambda_on=1., lambda_off=1.)
+    la = Synapse(side_length=(L := 3), alpha=1., beta=1., lambda_on=1., lambda_off=1.)
     scalar = 0
     for y in range(L):
         for x in range(L):
@@ -15,14 +17,14 @@ def test_scalar_index_to_xy():
 
 
 def test_yx_to_scalar_index():
-    la = Synapse(side_length=(L := 3), alpha=1., lambda_on=1., lambda_off=1.)
+    la = Synapse(side_length=(L := 3), alpha=1., beta=1., lambda_on=1., lambda_off=1.)
     cartesian_indices = product(range(L), range(L))
     for cartesian, scalar in zip(cartesian_indices, range(L ** 2)):
         assert cartesian == la._scalar_index_to_xy(scalar)
         
 
 def get_neighbors():
-    la = Synapse(side_length=(L := 3), alpha=1., lambda_on=1., lambda_off=1.)
+    la = Synapse(side_length=(L := 3), alpha=1., beta=1., lambda_on=1., lambda_off=1.)
     query_answers = [
         ((0, 0), [(0, 1), (1, 0), (1, 1)]),
         ((0, 1), [(0, 0), (0, 2), (1, 0), (1, 1), (1, 2)]),
@@ -36,7 +38,7 @@ def get_neighbors():
 
 
 def test_count_occupied_neighbors():
-    syp = Synapse(side_length=3, alpha=1, lambda_on=1, lambda_off=1)
+    syp = Synapse(side_length=3, alpha=1, beta=1, lambda_on=1, lambda_off=1)
 
     # Fill lattice to at 4 arbitrary sites
     coordinates = [(0, 0), (0, 1), (1, 0), (1, 2)]
@@ -63,7 +65,7 @@ def test_count_occupied_neighbors():
 
 
 def test_select_site():
-    syp = Synapse(side_length=3, alpha=1, lambda_on=1, lambda_off=1)
+    syp = Synapse(side_length=3, alpha=1, beta=1, lambda_on=1, lambda_off=1)
     with pytest.warns(RuntimeWarning):
         for _ in range(30):
             # propensities are all zero, site 0 should always be selected
@@ -72,7 +74,7 @@ def test_select_site():
 
 
 def test_update_site_p():
-    syp = Synapse(side_length=2, alpha=1, lambda_on=1, lambda_off=0.5)
+    syp = Synapse(side_length=2, alpha=1, beta=1, lambda_on=1, lambda_off=0.5)
     syp.s[:] = 1; syp.s[1, 1] = 0
     syp.ss[1:-1, 1:-1] = syp.s
 
@@ -94,7 +96,7 @@ def test_trigger():
     """
 
     pool = MoleculePool(delta=1., gamma=2., max_n=1000, init_n=100)
-    syp = Synapse(side_length=3, alpha=0.05, lambda_on=1., lambda_off=0.8, pool_instance=pool)
+    syp = Synapse(side_length=3, alpha=0.05, beta=1, lambda_on=1., lambda_off=0.8, pool_instance=pool)
 
     # Initialize synapse
     syp.s = np.random.randint(low=0, high=2, size=syp.s.shape)
