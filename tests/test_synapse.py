@@ -92,7 +92,7 @@ def test_update_site_p():
 def test_update_all_p():
     """ Compare vectorized computation to for loop + update_site_p() """
     pool = MoleculePool(delta=1., gamma=2., max_n=1000, init_n=100)
-    syp = Synapse(side_length=3, alpha=0.05, beta=0.05, lambda_on=1., lambda_off=0.8, pool_instance=pool)
+    syp = Synapse(side_length=5, alpha=0.05, beta=0.05, lambda_on=1., lambda_off=0.8, pool_instance=pool)
 
     # Initialize synaptic occupancies and propensities
     # SynapseInitializer uses for loop + update_site_p()
