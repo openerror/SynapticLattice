@@ -16,7 +16,7 @@ class Synapse:
         self.neighbor_mask = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=self.ss.dtype)
         self.p = np.zeros(shape=(side_length * side_length, 2), dtype=np.float64)
         self.total_p: float = 0.
-        self.alpha, self.lambda_on, self.lambda_off = alpha, lambda_on, lambda_off
+        self.alpha, self.beta, self.lambda_on, self.lambda_off = alpha, beta, lambda_on, lambda_off
         self.side_length: int = side_length
         self.pool_instance = pool_instance
         self.pool_factor_func = pool_factor_func  # function postprocessing the raw filled fraction
@@ -105,7 +105,7 @@ class Synapse:
         v = v / self.neighbor_mask.sum()  # normalize to fraction [0...1]
         on_mask, off_mask = (self.s == 1).flatten(), (self.s == 0).flatten()
 
-        self.p[:, 1] = np.where(on_mask, self.lambda_off * (1. - v.flatten()), 0.)
+        self.p[:, 1] = np.where(on_mask, self.beta + self.lambda_off * (1. - v.flatten()), 0.)
         self.p[:, 0] = np.where(off_mask, self.alpha + self.lambda_on * v.flatten(), 0.)
         if self.pool_instance:
             self.p[on_mask, 1] *= (self.pool_instance.max_n - self.pool_instance.n)
