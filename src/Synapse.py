@@ -87,7 +87,7 @@ class Synapse:
         self.p[site_index] = 0.
 
         if self.s[y, x] == 1:  # removal to pool
-            self.p[site_index, 1] = self.lambda_off * (1. - v)
+            self.p[site_index, 1] = self.beta + self.lambda_off * (1. - v)
             if self.pool_instance:
                 self.p[site_index, 1] *= (self.pool_instance.max_n - self.pool_instance.n)
         elif self.s[y, x] == 0:  # uptake from pool
@@ -128,11 +128,7 @@ class Synapse:
 
     def _count_occupied_neighbors(self, site_scalar_index: int) -> int:
         center_y, center_x = self._scalar_index_to_xy(site_scalar_index)
-        occupied_neighbors = 0  # translated from self.s to self.ss coordinates
-        for y in (center_y, center_y + 1, center_y + 2):
-            for x in (center_x, center_x + 1, center_x + 2):
-                occupied_neighbors += (1 if self.ss[y, x] == 1 else 0)
-        return (occupied_neighbors - 1) if self.s[center_y, center_x] == 1 else occupied_neighbors
+        return int(np.sum(self.neighbor_mask * self.ss[center_y:center_y+3, center_x:center_x+3]))
 
     def _pool_factor(self) -> float:
         """
