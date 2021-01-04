@@ -84,7 +84,7 @@ def test_update_site_p():
     true_p = np.zeros_like(syp.p)  # update below if dynamics model changes
     true_p[0, 1] = syp.beta + syp.lambda_off * (1. - 2/8)
     true_p[1, 1] = syp.beta + syp.lambda_off * (1. - 2/8)
-    true_p[2, 1] = syp.beta + isyp.lambda_off * (1. - 2/8)
+    true_p[2, 1] = syp.beta + syp.lambda_off * (1. - 2/8)
     true_p[3, 0] = syp.alpha + syp.lambda_on * 3/8
     assert np.allclose(true_p, syp.p)
 
