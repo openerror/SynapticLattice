@@ -28,5 +28,9 @@ class RawRecord:
 
     def __post_init__(self):
         self.times = zeros(shape=(self.n_steps,), dtype=float32)
-        self.pool_occupancy = zeros(shape=(self.n_steps,), dtype=uint16)
         self.synapse_occupancy = zeros(shape=(self.n_steps, self.n_synapses), dtype=uint16)
+        if self.max_pool_n and self.init_pool_n:
+            # Only track pool occupancy when there is a pool
+            self.pool_occupancy = zeros(shape=(self.n_steps,), dtype=uint16)
+        else:
+            self.pool_occupancy = None
