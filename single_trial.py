@@ -8,7 +8,7 @@ from src.SypInit import SynapseInitializer
 
 
 @ray.remote
-def run_single_trial(max_steps: int, trial_id: int, *args, **kwargs):
+def run_single_trial(trial_id: int, max_steps: int = None, *args, **kwargs):
     """
     Modify returned objects to collect different kinds of data
     """
@@ -17,12 +17,18 @@ def run_single_trial(max_steps: int, trial_id: int, *args, **kwargs):
     output_dir = kwargs.get("output_dir")
 
     # Create synapses and pool
-    # pool = MoleculePool(max_n=2500, init_n=1250, **pool_rates)
+    # pool = MoleculePool(max_n=2500, init_n=2500, **pool_rates)
+    # synapses = [Synapse(side_length=50, pool_instance=pool, **synaptic_rates)]
     synapses = [Synapse(side_length=50, pool_instance=None, **synaptic_rates)]
 
     # Create Simulation instance
+    # sim = Simulation(synapses=synapses, m_pool=pool)
+    # record = RawRecord(max_steps, len(synapses), pool.max_n, pool.n,
+    #                    [syp.side_length for syp in sim.synapses],
+    #                    [syp.s.sum() for syp in sim.synapses],
+    #                    **synaptic_rates, **pool_rates)
     sim = Simulation(synapses=synapses, m_pool=None)
-    record = RawRecord(max_steps, len(synapses), None, None,  #pool.max_n, pool.n,
+    record = RawRecord(max_steps, len(synapses), None, None,
                        [syp.side_length for syp in sim.synapses],
                        [syp.s.sum() for syp in sim.synapses],
                        **synaptic_rates, **pool_rates)
@@ -30,9 +36,12 @@ def run_single_trial(max_steps: int, trial_id: int, *args, **kwargs):
     # Initialize synaptic occupancies
     syp_init = SynapseInitializer()
     for syp in synapses:
-        syp_init.random_init(syp, fill_frac=0.2)
+        syp_init.empty_init(syp)
 
-    # Run the simulation
+    # Run the simulation: warm start, and then record
+    for nw in range(max(2000, max_steps//3)):
+        _ = sim.single_step()
+
     for ns in range(max_steps):
         _ = sim.single_step()
         record.synapse_occupancy[ns, :] = sim.get_synapse_sizes()
@@ -41,9 +50,8 @@ def run_single_trial(max_steps: int, trial_id: int, *args, **kwargs):
             record.pool_occupancy[ns] = sim.m_pool.n
 
     # Clean up, store/return results
-    if trial_id % 500 == 0:
+    with open(os.path.join(output_dir, f"rec-{trial_id}.dill"), "wb") as f:
+        dill.dump(record, f)
+    if trial_id % 50 == 0:
         print(f"Trial {trial_id} completed")
-        with open(os.path.join(output_dir, f"rec-{trial_id}.dill"), "wb") as f:
-            dill.dump(record, f)
-
-    return record
+    return trial_id

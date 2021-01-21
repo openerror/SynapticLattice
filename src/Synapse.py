@@ -79,7 +79,7 @@ class Synapse:
         v = self._count_occupied_neighbors(site_index) / 8.
 
         # pool factor [0...1]
-        pf = self._pool_factor()
+        # pf = self._pool_factor()
 
         # update propensity
         y, x = self._scalar_index_to_xy(site_index)
