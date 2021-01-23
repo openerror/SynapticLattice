@@ -4,7 +4,7 @@ from src.locate_first_geq import locate_first_geq
 
 class MoleculePool:
     def __init__(self, delta: float, gamma: float,
-                 max_n: int, init_n: int = 0, random_state=None):
+                 max_n: int = np.inf, init_n: int = 0, random_state=None):
         assert init_n >= 0, "ERROR: specified a negative initial amount"
         assert max_n >= init_n, "ERROR: specified maximal amt smaller than initial amt"
 

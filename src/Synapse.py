@@ -88,8 +88,8 @@ class Synapse:
 
         if self.s[y, x] == 1:  # removal to pool
             self.p[site_index, 1] = self.beta + self.lambda_off * (1. - v)
-            if self.pool_instance:
-                self.p[site_index, 1] *= (self.pool_instance.max_n - self.pool_instance.n)
+            # if self.pool_instance:
+            #     self.p[site_index, 1] *= (self.pool_instance.max_n - self.pool_instance.n)
         elif self.s[y, x] == 0:  # uptake from pool
             self.p[site_index, 0] = self.alpha + self.lambda_on * v
             if self.pool_instance: self.p[site_index, 0] *= self.pool_instance.n
@@ -108,7 +108,7 @@ class Synapse:
         self.p[:, 1] = np.where(on_mask, self.beta + self.lambda_off * (1. - v.flatten()), 0.)
         self.p[:, 0] = np.where(off_mask, self.alpha + self.lambda_on * v.flatten(), 0.)
         if self.pool_instance:
-            self.p[on_mask, 1] *= (self.pool_instance.max_n - self.pool_instance.n)
+            # self.p[on_mask, 1] *= (self.pool_instance.max_n - self.pool_instance.n)
             self.p[off_mask, 0] *= self.pool_instance.n
         self.update_total_p()
         # for site_index in range(self.s.size):

@@ -17,18 +17,13 @@ def run_single_trial(trial_id: int, max_steps: int = None, *args, **kwargs):
     output_dir = kwargs.get("output_dir")
 
     # Create synapses and pool
-    # pool = MoleculePool(max_n=2500, init_n=2500, **pool_rates)
-    # synapses = [Synapse(side_length=50, pool_instance=pool, **synaptic_rates)]
-    synapses = [Synapse(side_length=50, pool_instance=None, **synaptic_rates)]
+    pool = MoleculePool(init_n=1500, **pool_rates)
+    synapses = [Synapse(side_length=i*10, pool_instance=pool, **synaptic_rates)
+                for i in range(2, 5)]
 
     # Create Simulation instance
-    # sim = Simulation(synapses=synapses, m_pool=pool)
-    # record = RawRecord(max_steps, len(synapses), pool.max_n, pool.n,
-    #                    [syp.side_length for syp in sim.synapses],
-    #                    [syp.s.sum() for syp in sim.synapses],
-    #                    **synaptic_rates, **pool_rates)
-    sim = Simulation(synapses=synapses, m_pool=None)
-    record = RawRecord(max_steps, len(synapses), None, None,
+    sim = Simulation(synapses=synapses, m_pool=pool)
+    record = RawRecord(max_steps, len(synapses), pool.max_n, pool.n,
                        [syp.side_length for syp in sim.synapses],
                        [syp.s.sum() for syp in sim.synapses],
                        **synaptic_rates, **pool_rates)
@@ -43,6 +38,11 @@ def run_single_trial(trial_id: int, max_steps: int = None, *args, **kwargs):
         _ = sim.single_step()
 
     for ns in range(max_steps):
+        # Injecting lots of pool molecules all at once
+        if ns == (max_steps // 2):
+            pool.n *= 5
+            pool.update_p()
+
         _ = sim.single_step()
         record.synapse_occupancy[ns, :] = sim.get_synapse_sizes()
         record.times[ns] = sim.T
