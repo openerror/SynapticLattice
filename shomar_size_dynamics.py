@@ -12,7 +12,7 @@ def old_new_scatter(recs: List[RawRecord], times_of_interest: List[int], num_tra
     fig, axes = get_fig_ax(nrows=3, ncols=2)
     interpolated_sypo = [interp_synapse_occupancy(r) for r in recs]
 
-    for ax, label in zip(axes.flatten(), ("A", "B", "C", "D", "E", "F")):
+    for ax, label in zip(axes.flatten(), ("(A)", "(B)", "(C)", "(D)", "(E)", "(F)")):
         ax.text(-0.13, 1.05, label, transform=ax.transAxes)
 
     """ A: sample trajectories """
