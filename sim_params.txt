@@ -1,0 +1,2 @@
+max_steps 50000
+max_time 1000
