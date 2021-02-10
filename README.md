@@ -9,3 +9,6 @@ Accelerated counting of nearest neighbors using [CNN](https://en.wikipedia.org/w
 ## Usage
 - Run from `simulate.py`
 - "Content" of each simulation instance described in `single_trial.py`
+
+## Unit Tests
+Run [pytest](https://docs.pytest.org/en/stable/) from the repo's root directory.
